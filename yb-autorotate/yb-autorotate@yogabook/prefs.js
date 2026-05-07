@@ -1,0 +1,352 @@
+/* prefs.js
+* Copyright (C) 2024  kosmospredanie, shyzus, Shinigaminai
+*
+* This program is free software: you can redistribute it and/or modify
+* it under the terms of the GNU General Public License as published by
+* the Free Software Foundation, either version 3 of the License, or
+* (at your option) any later version.
+*
+* This program is distributed in the hope that it will be useful,
+* but WITHOUT ANY WARRANTY; without even the implied warranty of
+* MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the
+* GNU General Public License for more details.
+*
+* You should have received a copy of the GNU General Public License
+* along with this program.  If not, see <https://www.gnu.org/licenses/>.
+*/
+
+import Gtk from 'gi://Gtk';
+import Gio from 'gi://Gio';
+import Adw from 'gi://Adw';
+
+import { ExtensionPreferences, gettext as _ } from 'resource:///org/gnome/Shell/Extensions/js/extensions/prefs.js';
+
+import { Orientation } from './orientation.js';
+
+export default class MyExtensionPreferences extends ExtensionPreferences {
+
+  fillPreferencesWindow(window) {
+    window._settings = this.getSettings();
+
+    const page = new Adw.PreferencesPage();
+    window.add(page);
+
+    const orientationGroup = new Adw.PreferencesGroup();
+    orientationGroup.set_title(_('Orientation Settings'));
+    page.add(orientationGroup);
+
+    const shellMenuGroup = new Adw.PreferencesGroup();
+    shellMenuGroup.set_title(_('GNOME Shell Menu Settings'));
+    page.add(shellMenuGroup);
+
+    const oskSettingsGroup = new Adw.PreferencesGroup();
+    oskSettingsGroup.set_title(_('On-Screen-Keyboard Settings'));
+    page.add(oskSettingsGroup);
+
+    const disableOnRotateGroup = new Adw.PreferencesGroup();
+    disableOnRotateGroup.set_title(_('Disable-On-Rotation Settings'));
+    page.add(disableOnRotateGroup);
+
+    const debugGroup = new Adw.PreferencesGroup();
+    debugGroup.set_title(_('Debug Settings'));
+    page.add(debugGroup);
+
+    const invertHorizontalRow = new Adw.ActionRow({
+      title: _('Invert horizontal rotation')
+    });
+    orientationGroup.add(invertHorizontalRow);
+
+    const invertVerticalRow = new Adw.ActionRow({
+      title: _('Invert vertical rotation')
+    });
+    orientationGroup.add(invertVerticalRow);
+
+    const flipOrientationRow = new Adw.ActionRow({
+      title: _('Flip orientation'),
+      subtitle: _('e.g: Landscape to Portrait. Default is Landscape')
+    });
+    orientationGroup.add(flipOrientationRow);
+
+    const setOffsetRow = new Adw.ActionRow({
+      title: _('Set orientation offset'),
+      subtitle: _('Valid offset range: 0 to 3. Default is 0') + '\n' +
+                _('Experiment with this in case orientation is incorrect due to the display being mounted in a non-landscape orientation') +
+                _(' e.g PineTab2 or GPD Pocket 3')
+    });
+
+    orientationGroup.add(setOffsetRow);
+
+    const skipInitRotationRow = new Adw.ActionRow({
+      title: _('Skip initial rotation'),
+      subtitle: _('Skip initial rotation on extension startup ensures the last known orientation is loaded on startup and the overview screen is not skipped.')
+    });
+
+    orientationGroup.add(skipInitRotationRow);
+
+    const enableManualFlipRow = new Adw.ActionRow({
+      title: _('Enable manual flip'),
+      subtitle: _('Enable a toggle in the GNOME Shell System Menu to manually flip between landscape and portrait.')
+    });
+    shellMenuGroup.add(enableManualFlipRow);
+
+    const hideLockRotateRow = new Adw.ActionRow({
+      title: _('Hide the "Auto Rotate" quick toggle')
+    });
+    shellMenuGroup.add(hideLockRotateRow);
+
+    const landscapeOskRow = new Adw.ActionRow({
+      title: _('Show OSK in landscape orientation')
+    });
+    oskSettingsGroup.add(landscapeOskRow);
+
+    const portraitRightOskRow = new Adw.ActionRow({
+      title: _('Show OSK in portrait (right) orientation')
+    });
+    oskSettingsGroup.add(portraitRightOskRow);
+
+    const landscapeFlippedOskRow = new Adw.ActionRow({
+      title: _('Show OSK in landscape (flipped) orientation')
+    });
+    oskSettingsGroup.add(landscapeFlippedOskRow);
+
+    const portraitLeftOskRow = new Adw.ActionRow({
+      title: _('Show OSK in portrait (left) orientation')
+    });
+    oskSettingsGroup.add(portraitLeftOskRow);
+
+    const toggleLoggingRow = new Adw.ActionRow({
+      title: _('Enable debug logging'),
+      subtitle: _('Use "journalctl /usr/bin/gnome-shell -f" to see log output.')
+    });
+    debugGroup.add(toggleLoggingRow);
+
+    const invertHorizontalRotationSwitch = new Gtk.Switch({
+      active: window._settings.get_boolean('invert-horizontal-rotation-direction'),
+      valign: Gtk.Align.CENTER,
+    });
+
+    const invertVerticalRotationSwitch = new Gtk.Switch({
+      active: window._settings.get_boolean('invert-vertical-rotation-direction'),
+      valign: Gtk.Align.CENTER,
+    });
+
+    const flipOrientationSwitch = new Gtk.Switch({
+      active: window._settings.get_boolean('flip-orientation'),
+      valign: Gtk.Align.CENTER,
+    });
+
+    const setOffsetSpinButton = Gtk.SpinButton.new_with_range(0, 3, 1);
+    setOffsetSpinButton.value = window._settings.get_int('orientation-offset');
+
+    const skipInitRotationButton = new Gtk.Switch({
+      active: window._settings.get_boolean('skip-initial-rotation'),
+      valign: Gtk.Align.CENTER
+    });
+
+    const manualFlipSwitch = new Gtk.Switch({
+      active: window._settings.get_boolean('manual-flip'),
+      valign: Gtk.Align.CENTER,
+    });
+
+    const hideLockRotateSwitch = new Gtk.Switch({
+      active: window._settings.get_boolean('hide-lock-rotate'),
+      valign: Gtk.Align.CENTER,
+    });
+
+    const landscapeOskCheckButton = new Gtk.CheckButton({
+      active: window._settings.get_boolean('landscape-osk'),
+      valign: Gtk.Align.CENTER
+    });
+
+    const portraitRightOskCheckButton = new Gtk.CheckButton({
+      active: window._settings.get_boolean('portrait-right-osk'),
+      valign: Gtk.Align.CENTER
+    });
+
+    const portraitLeftOskCheckButton = new Gtk.CheckButton({
+      active: window._settings.get_boolean('portrait-left-osk'),
+      valign: Gtk.Align.CENTER
+    });
+
+    const landscapeFlippedOskCheckButton = new Gtk.CheckButton({
+      active: window._settings.get_boolean('landscape-flipped-osk'),
+      valign: Gtk.Align.CENTER
+    });
+
+    const dorNotebook = new Gtk.Notebook();
+    
+    const dorKeyboardPage = new Gtk.ListBox();
+    dorKeyboardPage.set_visible(false); // Keep hidden until feature can be implemented.
+    dorKeyboardPage.set_selection_mode(Gtk.SelectionMode.NONE);
+
+    for (let orientation in Orientation) {
+      let actionRowTitle = undefined;
+      let checkButtonBoolId = undefined;
+      
+      switch (orientation) {
+        case 'normal':
+          actionRowTitle = _("Landscape");
+          checkButtonBoolId = "dor-keyboard-landscape";
+          break;
+        case 'left-up':
+          actionRowTitle = _("Portrait (Left)");
+          checkButtonBoolId = "dor-keyboard-portrait-left";
+          break;
+        case 'bottom-up':
+          actionRowTitle = _("Landscape Flipped");
+          checkButtonBoolId = "dor-keyboard-landscape-flipped";
+          break;
+        case 'right-up':
+          actionRowTitle = _("Portrait (Right)");
+          checkButtonBoolId = "dor-keyboard-portrait-right";
+          break;
+      }
+      
+      const dorActionRow = new Adw.ActionRow({
+        title: actionRowTitle
+      });
+
+      const dorCheckButton = new Gtk.CheckButton({
+        active: window._settings.get_boolean(checkButtonBoolId),
+        valign: Gtk.Align.CENTER
+      });
+
+      window._settings.bind(checkButtonBoolId,
+        dorCheckButton, 'active', Gio.SettingsBindFlags.DEFAULT);
+
+      dorActionRow.add_suffix(dorCheckButton);
+      dorActionRow.activatable_widget = dorCheckButton;
+
+      dorKeyboardPage.append(dorActionRow);
+    }
+    
+    const dorTouchpadPage = new Gtk.ListBox();
+    dorTouchpadPage.set_selection_mode(Gtk.SelectionMode.NONE);
+    
+    for (let orientation in Orientation) {
+      let actionRowTitle = undefined;
+      let checkButtonBoolId = undefined;
+      
+      switch (orientation) {
+        case 'normal':
+          actionRowTitle = _("Landscape");
+          checkButtonBoolId = "dor-touchpad-landscape";
+          break;
+        case 'left-up':
+          actionRowTitle = _("Portrait (Left)");
+          checkButtonBoolId = "dor-touchpad-portrait-left";
+          break;
+        case 'bottom-up':
+          actionRowTitle = _("Landscape Flipped");
+          checkButtonBoolId = "dor-touchpad-landscape-flipped";
+          break;
+        case 'right-up':
+          actionRowTitle = _("Portrait (Right)");
+          checkButtonBoolId = "dor-touchpad-portrait-right";
+          break;
+      }
+      
+      const dorActionRow = new Adw.ActionRow({
+        title: actionRowTitle
+      });
+
+      const dorCheckButton = new Gtk.CheckButton({
+        active: window._settings.get_boolean(checkButtonBoolId),
+        valign: Gtk.Align.CENTER
+      });
+
+      window._settings.bind(checkButtonBoolId,
+        dorCheckButton, 'active', Gio.SettingsBindFlags.DEFAULT);
+
+      dorActionRow.add_suffix(dorCheckButton);
+      dorActionRow.activatable_widget = dorCheckButton;
+
+      dorTouchpadPage.append(dorActionRow);
+    }
+
+    const dorKeyboardLabel = Gtk.Label.new(_('Keyboard'));
+    dorNotebook.append_page(dorKeyboardPage, dorKeyboardLabel);
+
+    const dorTouchpadLabel = Gtk.Label.new(_('Touchpad'));
+    dorNotebook.append_page(dorTouchpadPage, dorTouchpadLabel)
+
+    disableOnRotateGroup.add(dorNotebook);
+    
+    const toggleLoggingSwitch = new Gtk.Switch({
+      active: window._settings.get_boolean('debug-logging'),
+      valign: Gtk.Align.CENTER
+    });
+
+    window._settings.bind('invert-horizontal-rotation-direction',
+      invertHorizontalRotationSwitch, 'active', Gio.SettingsBindFlags.DEFAULT);
+
+    window._settings.bind('invert-vertical-rotation-direction',
+      invertVerticalRotationSwitch, 'active', Gio.SettingsBindFlags.DEFAULT);
+
+    window._settings.bind('flip-orientation',
+      flipOrientationSwitch, 'active', Gio.SettingsBindFlags.DEFAULT);
+
+    window._settings.bind('orientation-offset',
+      setOffsetSpinButton, 'value', Gio.SettingsBindFlags.DEFAULT);
+
+    window._settings.bind('skip-initial-rotation',
+      skipInitRotationButton, 'active', Gio.SettingsBindFlags.DEFAULT);
+
+    window._settings.bind('manual-flip',
+      manualFlipSwitch, 'active', Gio.SettingsBindFlags.DEFAULT);
+
+     window._settings.bind('hide-lock-rotate',
+      hideLockRotateSwitch, 'active', Gio.SettingsBindFlags.DEFAULT);
+
+    window._settings.bind('landscape-osk',
+      landscapeOskCheckButton, 'active', Gio.SettingsBindFlags.DEFAULT);
+
+    window._settings.bind('portrait-right-osk',
+      portraitRightOskCheckButton, 'active', Gio.SettingsBindFlags.DEFAULT);
+
+    window._settings.bind('portrait-left-osk',
+      portraitLeftOskCheckButton, 'active', Gio.SettingsBindFlags.DEFAULT);
+
+    window._settings.bind('landscape-flipped-osk',
+      landscapeFlippedOskCheckButton, 'active', Gio.SettingsBindFlags.DEFAULT);
+
+    window._settings.bind('debug-logging',
+      toggleLoggingSwitch, 'active', Gio.SettingsBindFlags.DEFAULT);
+
+    invertHorizontalRow.add_suffix(invertHorizontalRotationSwitch);
+    invertHorizontalRow.activatable_widget = invertHorizontalRotationSwitch;
+
+    invertVerticalRow.add_suffix(invertVerticalRotationSwitch);
+    invertVerticalRow.activatable_widget = invertVerticalRotationSwitch;
+
+    flipOrientationRow.add_suffix(flipOrientationSwitch);
+    flipOrientationRow.activatable_widget = flipOrientationSwitch;
+
+    setOffsetRow.add_suffix(setOffsetSpinButton);
+    setOffsetRow.activatable_widget = setOffsetSpinButton;
+
+    skipInitRotationRow.add_suffix(skipInitRotationButton);
+    skipInitRotationRow.activatable_widget = skipInitRotationButton;
+
+    enableManualFlipRow.add_suffix(manualFlipSwitch);
+    enableManualFlipRow.activatable_widget = manualFlipSwitch;
+
+    hideLockRotateRow.add_suffix(hideLockRotateSwitch);
+    hideLockRotateRow.activatable_widget = hideLockRotateSwitch;
+
+    landscapeOskRow.add_suffix(landscapeOskCheckButton);
+    landscapeOskRow.activatable_widget = landscapeOskCheckButton;
+
+    portraitRightOskRow.add_suffix(portraitRightOskCheckButton);
+    portraitRightOskRow.activatable_widget = portraitRightOskCheckButton;
+
+    portraitLeftOskRow.add_suffix(portraitLeftOskCheckButton);
+    portraitLeftOskRow.activatable_widget = portraitLeftOskCheckButton;
+
+    landscapeFlippedOskRow.add_suffix(landscapeFlippedOskCheckButton);
+    landscapeFlippedOskRow.activatable_widget = landscapeFlippedOskCheckButton;
+
+    toggleLoggingRow.add_suffix(toggleLoggingSwitch);
+    toggleLoggingRow.activatable_widget = toggleLoggingSwitch;
+  }
+}

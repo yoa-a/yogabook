@@ -1,0 +1,12 @@
+{
+  "name": "YB AutoRotate",
+  "description": "Enable screen rotation regardless of touch mode on Lenovo YogaBook. Fork of Screen Autorotate by Kosmospredanie.",
+  "url": "https://github.com/shyzus/gnome-shell-extension-screen-autorotate",
+  "uuid": "yb-autorotate@yogabook",
+  "settings-schema": "org.gnome.shell.extensions.yb-autorotate",
+  "gettext-domain": "yb-autorotate",
+  "session-modes": ["user", "unlock-dialog"],
+  "shell-version": [
+    "45", "46", "47", "48", "49", "50"
+  ]
+}

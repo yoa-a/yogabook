@@ -1,0 +1,12 @@
+[Unit]
+Description=YogaBook keyboard position — initialise /run/yogabook-kbd-pos at boot
+Documentation=https://github.com/yoa-a/yogabook
+After=local-fs.target
+
+[Service]
+Type=oneshot
+RemainAfterExit=yes
+ExecStart=/etc/acpi/yogabook-kbd.sh
+
+[Install]
+WantedBy=multi-user.target

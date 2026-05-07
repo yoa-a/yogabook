@@ -1,0 +1,99 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<schemalist>
+  <schema id="org.gnome.shell.extensions.yb-keyboard-zones"
+          path="/org/gnome/shell/extensions/yb-keyboard-zones/">
+
+    <!-- Master on/off switch, bound to the Quick Settings toggle -->
+    <key name="extension-enabled" type="b">
+      <default>true</default>
+      <summary>Enable keyboard position adaptation</summary>
+      <description>
+        When false the extension takes no action on keyboard position changes
+        and any active overlays are cleared.
+      </description>
+    </key>
+
+    <!--
+      Connector name of the bottom built-in screen (the one that has magnetic
+      keyboard slots).  Find yours with:
+        gdbus call -e -d org.gnome.Mutter.DisplayConfig \
+          -o /org/gnome/Mutter/DisplayConfig \
+          -m org.gnome.Mutter.DisplayConfig.GetCurrentState
+      and look for the lower-y logical monitor.  Typical value: "eDP-1".
+    -->
+    <key name="bottom-screen-connector" type="s">
+      <default>'eDP-2'</default>
+      <summary>Connector name of the bottom screen</summary>
+      <description>
+        The output connector (e.g. eDP-1, eDP-2) that corresponds to the
+        bottom touchscreen — the one with the magnetic keyboard slots.
+      </description>
+    </key>
+
+    <!--
+      Connector name of the top built-in screen.
+      The dock is moved here when the keyboard is placed on the bottom screen.
+    -->
+    <key name="top-screen-connector" type="s">
+      <default>'eDP-1'</default>
+      <summary>Connector name of the top screen</summary>
+      <description>
+        The output connector (e.g. eDP-1, eDP-2) that corresponds to the
+        top built-in screen. The dock is moved here when the keyboard is placed.
+      </description>
+    </key>
+
+    <!-- Enable verbose logging to the GNOME Shell journal -->
+    <key name="debug-logging" type="b">
+      <default>true</default>
+      <summary>Enable debug logging</summary>
+      <description>
+        When true, position changes and overlay actions are written to the
+        GNOME Shell journal: journalctl -f /usr/bin/gnome-shell
+      </description>
+    </key>
+
+    <!-- Whether to enable the GNOME on-screen keyboard when no keyboard present -->
+    <key name="show-osk-when-detached" type="b">
+      <default>true</default>
+      <summary>Show on-screen keyboard when keyboard is detached</summary>
+      <description>
+        Automatically enable the accessibility on-screen keyboard when the
+        magnetic keyboard is not placed on the screen.
+      </description>
+    </key>
+
+    <!--
+      Fraction of the bottom screen's height that the physical keyboard covers.
+      0.56 means the keyboard is 56% of the screen height.
+      Adjust if the overlay doesn't align with the physical keyboard edge.
+    -->
+    <key name="keyboard-height-ratio" type="d">
+      <default>0.56</default>
+      <summary>Keyboard height as a fraction of screen height</summary>
+      <description>
+        The physical keyboard covers this fraction of the bottom screen height.
+        0.56 = 56%. Increase if the keyboard covers more than half the screen.
+      </description>
+    </key>
+
+    <!--
+      Dock restoration — persisted originals.
+      Set by the extension the first time it moves the dock; cleared when
+      the dock is restored.  Survives gnome-shell crashes and unexpected
+      logouts so the dock is never permanently stranded.
+      Sentinel value -999 means “not currently saved”.
+    -->
+    <key name="original-dock-monitor" type="i">
+      <default>-999</default>
+      <summary>Saved original dock preferred-monitor (internal)</summary>
+      <description>Used internally to restore the dock after a crash or unexpected logout.</description>
+    </key>
+    <key name="original-dock-connector" type="s">
+      <default>''</default>
+      <summary>Saved original dock preferred-monitor-by-connector (internal)</summary>
+      <description>Used internally to restore the dock after a crash or unexpected logout.</description>
+    </key>
+
+  </schema>
+</schemalist>

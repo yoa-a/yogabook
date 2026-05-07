@@ -1,0 +1,13 @@
+# OS
+.DS_Store
+Thumbs.db
+
+# Editors
+.vscode/
+.idea/
+*.swp
+*.swo
+*~
+
+# The installed extension directory is managed by setup.sh — don't track it
+# (it lives in ~/.local/share/gnome-shell/extensions/, outside this repo anyway)

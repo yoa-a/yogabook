@@ -1,0 +1,9 @@
+/* Solid black overlay covering the keyboard-occupied half of the bottom screen */
+.kbd-hotspot-overlay {
+    background-color: #000000;
+}
+
+/* Virtual touchpad on the visible half — subtle tint so the area is identifiable */
+.kbd-hotspot-touchpad {
+    background-color: rgba(20, 20, 20, 0.18);
+}

@@ -1,0 +1,114 @@
+/* sensorProxy.js
+* Copyright (C) 2025  kosmospredanie, shyzus
+*
+* This program is free software: you can redistribute it and/or modify
+* it under the terms of the GNU General Public License as published by
+* the Free Software Foundation, either version 3 of the License, or
+* (at your option) any later version.
+*
+* This program is distributed in the hope that it will be useful,
+* but WITHOUT ANY WARRANTY; without even the implied warranty of
+* MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the
+* GNU General Public License for more details.
+*
+* You should have received a copy of the GNU General Public License
+* along with this program.  If not, see <https://www.gnu.org/licenses/>.
+*/
+
+import Gio from 'gi://Gio';
+
+const SENSOR_PROXY_TIMEOUT_MS = 5000;
+
+export class SensorProxy {
+  constructor(rotate_cb) {
+    this._rotate_cb = rotate_cb;
+    this._proxy = null;
+    this._enabled = false;
+    this._watcher_id = Gio.bus_watch_name(
+      Gio.BusType.SYSTEM,
+      'net.hadess.SensorProxy',
+      Gio.BusNameWatcherFlags.NONE,
+      this.appeared.bind(this),
+      this.vanished.bind(this)
+    );
+  }
+
+  destroy() {
+    Gio.bus_unwatch_name(this._watcher_id);
+    if (this._enabled) this.disable();
+    this._proxy = null;
+  }
+
+  enable() {
+    this._enabled = true;
+    if (this._proxy === null) return;
+    this._call_proxy_method('ClaimAccelerometer');
+  }
+
+  disable() {
+    this._enabled = false;
+    if (this._proxy === null) return;
+    this._call_proxy_method('ReleaseAccelerometer');
+  }
+
+  _call_proxy_method(method) {
+    this._proxy.call(
+      method,
+      null,
+      Gio.DBusCallFlags.NONE,
+      SENSOR_PROXY_TIMEOUT_MS,
+      null,
+      (proxy, res) => {
+        try {
+          proxy.call_finish(res);
+        } catch (err) {
+          console.error(`[screen-rotate] ${method} failed`, err);
+        }
+      }
+    );
+  }
+
+  appeared(_connection, _name, _name_owner) {
+    try {
+      this._proxy = Gio.DBusProxy.new_for_bus_sync(
+        Gio.BusType.SYSTEM, Gio.DBusProxyFlags.NONE, null,
+        'net.hadess.SensorProxy', '/net/hadess/SensorProxy', 'net.hadess.SensorProxy',
+        null);
+      this._proxy.connect('g-properties-changed', this.properties_changed.bind(this));
+      if (this._enabled) {
+        this._call_proxy_method('ClaimAccelerometer');
+      }
+    } catch (err) {
+      console.error('[screen-rotate] Failed to create SensorProxy', err);
+    }
+  }
+
+  vanished(_connection, _name) {
+    this._proxy = null;
+  }
+
+  get_accelerometer_orientation() {
+    if (this._enabled) {
+      let variant = this._proxy.get_cached_property('AccelerometerOrientation');
+      if (variant === null) {
+        return undefined;
+      }
+
+      let orientation = variant.unpack();
+      variant.unref();
+      return orientation;
+    }
+
+    return undefined;
+  }
+
+  properties_changed(proxy, changed, _invalidated) {
+    if (!this._enabled) return;
+    let properties = changed.deep_unpack();
+    for (let [name, value] of Object.entries(properties)) {
+      if (name !== 'AccelerometerOrientation') continue;
+      let target = value.unpack();
+      this._rotate_cb(target);
+    }
+  }
+}

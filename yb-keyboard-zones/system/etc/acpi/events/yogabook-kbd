@@ -1,0 +1,6 @@
+# acpid event rule — YogaBook keyboard position sensor
+# Fires when EC query _QB0 detects a magnetic keyboard position change.
+# The WMI driver translates it to: wmi PNP0C14:01 000000eb 00000000
+
+event=wmi PNP0C14:01 000000eb
+action=/etc/acpi/yogabook-kbd.sh

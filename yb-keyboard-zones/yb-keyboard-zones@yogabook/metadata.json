@@ -1,0 +1,9 @@
+{
+    "uuid": "yb-keyboard-zones@yogabook",
+    "name": "YB Keyboard Zones",
+    "description": "Adjusts display and virtual mousepad based on the magnetic keyboard position on the Lenovo YogaBook.",
+    "version": 1,
+    "shell-version": ["45", "46", "47", "48", "49", "50"],
+    "url": "https://github.com/yoa-a/yogabook/tree/main/yb-keyboard-zones",
+    "settings-schema": "org.gnome.shell.extensions.yb-keyboard-zones"
+}

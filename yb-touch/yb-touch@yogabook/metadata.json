@@ -1,0 +1,8 @@
+{
+  "uuid": "yb-touch@yogabook",
+  "name": "YB Touch",
+  "description": "Toggle the Yoga Book 9 dual touchscreen/stylus proxy on and off. Workaround for GNOME mutter#1019 — devices sharing USB ID 17ef:6161 cannot be independently mapped to two screens.",
+  "version": 1,
+  "shell-version": ["45", "46", "47", "48", "49", "50"],
+  "url": ""
+}
